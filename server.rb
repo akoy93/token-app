@@ -7,6 +7,7 @@ TWITTER_CALLBACK_URL = ENV['TWITTER_CALLBACK_URL']
 VENMO_CONSUMER_KEY = ENV['VENMO_CONSUMER_KEY']
 VENMO_CONSUMER_SECRET = ENV['VENMO_CONSUMER_SECRET']
 VENMO_CALLBACK_URL = ENV['VENMO_CALLBACK_URL']
+FIREBASE_URL = ENV['FIREBASE_URL']
 
 VENMO_SCOPE = ['access_profile', 'make_payments']
 
@@ -57,6 +58,9 @@ end
 #finish, send twitter handle, access token, and secret to firebase
 # send venmo id, venmo access token, and venmo secret to firebase
 get '/finish' do 
+  twitter_username = nil
+  venmo_username = nil
+
   # get twitter username
   client = Twitter.configure do |config|
     config.consumer_key = TWITTER_CONSUMER_KEY
@@ -66,21 +70,29 @@ get '/finish' do
   end
 
   #twitter username:
-  puts client.user.screen_name  
+  twitter_username = client.user.screen_name
 
-# get venmo username
-uri = URI("https://api.venmo.com/v1/me?access_token=#{session[:venmo_access_token]}")
+  # get venmo username
+  uri = URI("https://api.venmo.com/v1/me?access_token=#{session[:venmo_access_token]}")
+  Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+    request = Net::HTTP::Get.new uri
+    response = http.request request # Net::HTTPResponse object
 
-Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
-  request = Net::HTTP::Get.new uri
+    # venmo username
+    venmo_username = JSON.parse(response.body)['data']['user']['username']
+  end
 
-  response = http.request request # Net::HTTPResponse object
+  unless session[:venmo_access_token].nil? || session[:twitter_access_token].nil? || session[:twitter_secret]
+    firebase = Firebase::Client.new(FIREBASE_URL)
+    response = firebase.update("users/#{twitter_username}", {"venmo_username" => venmo_username, \
+        "venmo_access_token" => session[:venmo_access_token], "twitter_access_token" => session[:twitter_access_token], \
+        "twitter_secret" => session[:twitter_secret]})
 
-  puts "username"
-  puts JSON.parse(response.body)[:data][:user][:username]
-end
+    puts (response.success?).to_s
+  end
 
-  puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
+  puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: \
+      #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
   redirect '/dashboard'
 end
 

@@ -8,6 +8,7 @@ require 'oauth'
 require 'twitter'
 require 'omniauth-venmo'
 require 'json'
+require 'firebase'
 
 require './env' if File.exists? 'env.rb'
 require './server'
