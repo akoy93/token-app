@@ -82,14 +82,18 @@ get '/finish' do
     venmo_username = JSON.parse(response.body)['data']['user']['username']
   end
 
-  unless session[:venmo_access_token].nil? || session[:twitter_access_token].nil? || session[:twitter_secret]
+  puts session[:venmo_access_token]
+  puts session[:twitter_access_token]
+  puts session[:twitter_secret]
+  puts "#{twitter_username}, #{venmo_username}"
+  puts "837using firebase:"
     firebase = Firebase::Client.new(FIREBASE_URL)
     response = firebase.update("users/#{twitter_username}", {"venmo_username" => venmo_username, \
         "venmo_access_token" => session[:venmo_access_token], "twitter_access_token" => session[:twitter_access_token], \
         "twitter_secret" => session[:twitter_secret]})
 
     puts (response.success?).to_s
-  end
+  # end
 
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: \
       #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
