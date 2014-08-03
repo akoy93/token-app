@@ -8,6 +8,7 @@ VENMO_CALLBACK_URL = ENV['VENMO_CALLBACK_URL']
 VENMO_SCOPE = ['access_profile', 'make_payments']
 
 get '/' do
+  puts "Hello, logs!"
   if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
     redirect '/dashboard'
   else 
@@ -54,6 +55,7 @@ end
 #finish, send twitter handle, access token, and secret to firebase
 # send venmo id, venmo access token, and venmo secret to firebase
 get '/finish' do 
+  puts "in finish"
   # get twitter username
   client = Twitter.configure do |config|
     config.consumer_key = TWITTER_CONSUMER_KEY
