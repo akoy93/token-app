@@ -1,3 +1,5 @@
+require 'net/http'
+
 TWITTER_CONSUMER_KEY = ENV['TWITTER_CONSUMER_KEY']
 TWITTER_CONSUMER_SECRET = ENV['TWITTER_CONSUMER_SECRET']
 TWITTER_CALLBACK_URL = ENV['TWITTER_CALLBACK_URL']
@@ -8,7 +10,6 @@ VENMO_CALLBACK_URL = ENV['VENMO_CALLBACK_URL']
 VENMO_SCOPE = ['access_profile', 'make_payments']
 
 get '/' do
-  puts "Hello, logs!"
   if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
     redirect '/dashboard'
   else 
@@ -55,7 +56,6 @@ end
 #finish, send twitter handle, access token, and secret to firebase
 # send venmo id, venmo access token, and venmo secret to firebase
 get '/finish' do 
-  puts "in finish"
   # get twitter username
   client = Twitter.configure do |config|
     config.consumer_key = TWITTER_CONSUMER_KEY
@@ -66,11 +66,17 @@ get '/finish' do
 
   puts "1234"
   puts client.user
+
+  #twitter username:
   puts client.user.screen_name  
 
   # get venmo username
+  url = URI.parse("https://api.venmo.com/v1/me?access_token=#{session[:venmo_access_token]}")
+  res = Net::HTTP::Get.new(url.to_s)
+  puts res.body
 
-  # s = "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
+
+  puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
   redirect '/dashboard'
 end
 
