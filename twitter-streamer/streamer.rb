@@ -3,6 +3,7 @@ require 'firebase'
 require 'pp'
 require './env' if File.exists? 'env.rb'
 
+
 firebase_uri = "https://incandescent-fire-5112.firebaseio.com/"
 firebase = Firebase::Client.new(firebase_uri)
 
@@ -37,7 +38,7 @@ TweetStream::Client.new.track(admin_twitter_handle) do |status|
     puts "\tText:" + text
 
     # Add to Firebase
-    response = firebase.update("campaigns/#{campaign_id}", { "fundraiser" => fundraiser, "timestamp" => timestamp, "text" => text })
+    response = firebase.update("campaigns/#{campaign_id}", { "fundraiser" => fundraiser, "timestamp" => timestamp, "text" => text, "campaign_id" => campaign_id })
     puts "firebase success: " + (response.success?).to_s
 
   else
@@ -61,11 +62,24 @@ TweetStream::Client.new.track(admin_twitter_handle) do |status|
     puts "\tText: " + text
 
     # Add to firebase
-    response = firebase.update("donations/#{donation_id}", { "campaign_id" => campaign_id, "timestamp" => timestamp, "donor" => donor, "fundraiser" => fundraiser, "text" => text, "processed_state" => "todo" })
+    response = firebase.update("donations/#{donation_id}", { "campaign_id" => campaign_id, "timestamp" => timestamp, "donor" => donor, "fundraiser" => fundraiser, "text" => text, "processed_state" => "todo", "donation_id" => donation_id })
     puts "firebase success: " + (response.success?).to_s
 
     # TODO
-    # Check if donor's details exist in user table and, if so, try to process payment
+
+    donor_data = firebase.get("users/#{donor}").body
+    if (donor_data.nil?)
+      puts "FIRST DONATION; SEND A TWITTER DM"
+    else 
+      donor_venmo_token = donor_data["venmo_access_token"]
+      fundraiser_venmo_userid = firebase.get("users/#{fundraiser}").body["venmo_user_id"]
+      note = "Token donation to: " + text
+
+      puts "donor_venmo_token:#{donor_venmo_token}"
+      puts "fundraiser_venmo_userid:#{fundraiser_venmo_userid}"
+      puts "note:#{note}"
+      puts "NOT FIRST DONATION; SEND VENMO PAYMENT"
+  end
   end
 end
 
