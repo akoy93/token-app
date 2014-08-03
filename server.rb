@@ -14,7 +14,7 @@ VENMO_SCOPE = ['access_profile', 'make_payments']
 FIREBASE = Firebase::Client.new(FIREBASE_URL)
 
 get '/' do
-  if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
+  if session[:twitter_access_token] && session[:twitter_secret] && session[:twitter_username] && session[:venmo_access_token]
     redirect '/dashboard'
   else 
     send_file File.expand_path('index.html', settings.public_folder)
@@ -22,7 +22,7 @@ get '/' do
 end
 
 get '/twitter/login' do
-  if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token].nil?
+  if session[:twitter_access_token] && session[:twitter_secret] && session[:twitter_username] && session[:venmo_access_token].nil?
     redirect '/venmo/login'
   end
   
@@ -77,6 +77,7 @@ get '/finish' do
 
   #twitter username:
   twitter_username = client.user.screen_name
+  session[:twitter_username] = twitter_username
 
   # get venmo user id
   uri = URI("https://api.venmo.com/v1/me?access_token=#{session[:venmo_access_token]}")
@@ -91,7 +92,7 @@ get '/finish' do
   unless session[:venmo_access_token].nil? || session[:twitter_access_token].nil? || session[:twitter_secret].nil?
     response = FIREBASE.update("users/#{twitter_username}", {"venmo_user_id" => venmo_user_id, \
         "venmo_access_token" => session[:venmo_access_token], "twitter_access_token" => session[:twitter_access_token], \
-        "twitter_secret" => session[:twitter_secret]})
+        "twitter_secret" => session[:twitter_secret], "twitter_username" => session[:twitter_username]})
 
     puts (response.success?).to_s
   end
@@ -129,9 +130,12 @@ get '/finish' do
 end
 
 get '/dashboard' do
-  if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
-    erb :dashboard
-  else
-    redirect '/'
-  end
+  donor_twitter_username = session[:twitter_username]
+  response = firebase.get("donations", {"donor" => donor_twitter_username})
+  @donations = response.body
+  # if session[:twitter_access_token] && session[:twitter_secret] && session[:twitter_username] && session[:venmo_access_token]
+  erb :dashboard
+  # else
+    # redirect '/'
+  # end
 end
