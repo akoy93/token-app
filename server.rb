@@ -14,6 +14,8 @@ VENMO_SCOPE = ['access_profile', 'make_payments']
 get '/' do
   if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
     redirect '/dashboard'
+  elsif session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token].nil?
+    redirect '/venmo/login'
   else 
     send_file File.expand_path('index.html', settings.public_folder)
   end
@@ -82,14 +84,14 @@ get '/finish' do
     venmo_username = JSON.parse(response.body)['data']['user']['username']
   end
 
-  puts "Nil?: #{session[:venmo_access_token].nil?}, #{session[:twitter_access_token]}, #{session[:twitter_secret]}"
-  # unless session[:venmo_access_token].nil? || session[:twitter_access_token].nil? || session[:twitter_secret]
-  firebase = Firebase::Client.new(FIREBASE_URL)
-  response = firebase.update("users/#{twitter_username}", {"venmo_username" => venmo_username, \
-      "venmo_access_token" => session[:venmo_access_token], "twitter_access_token" => session[:twitter_access_token], \
-      "twitter_secret" => session[:twitter_secret]})
+  unless session[:venmo_access_token].nil? || session[:twitter_access_token].nil? || session[:twitter_secret].nil?
+    firebase = Firebase::Client.new(FIREBASE_URL)
+    response = firebase.update("users/#{twitter_username}", {"venmo_username" => venmo_username, \
+        "venmo_access_token" => session[:venmo_access_token], "twitter_access_token" => session[:twitter_access_token], \
+        "twitter_secret" => session[:twitter_secret]})
 
-  puts (response.success?).to_s
+    puts (response.success?).to_s
+  end
 
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: \
       #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
