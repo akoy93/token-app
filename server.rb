@@ -108,7 +108,7 @@ get '/finish' do
         FIREBASE.update("donations/#{k}", {'processed_state' => 'todo'})
       else 
         donor_venmo_token = donor_data["venmo_access_token"]
-        fundraiser_venmo_userid = firebase.get("users/#{v['fundraiser']}").body["venmo_user_id"]
+        fundraiser_venmo_userid = FIREBASE.get("users/#{v['fundraiser']}").body["venmo_user_id"]
         note = "Token donation to: " + v['text']
         puts "donor_venmo_token:#{donor_venmo_token}"
         puts "fundraiser_venmo_userid:#{fundraiser_venmo_userid}"
