@@ -80,7 +80,7 @@ Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
   response = http.request request # Net::HTTPResponse object
   puts "1234"
   puts request
-  puts response
+  puts response.body
 end
 
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
