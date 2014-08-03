@@ -65,9 +65,6 @@ get '/finish' do
     config.oauth_token_secret = session[:twitter_secret]
   end
 
-  puts "1234"
-  puts client.user
-
   #twitter username:
   puts client.user.screen_name  
 
@@ -78,10 +75,9 @@ Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
   request = Net::HTTP::Get.new uri
 
   response = http.request request # Net::HTTPResponse object
-  puts "1234"
-  puts request
-  puts "5678"
-  puts JSON.parse(response.body).data.user.username
+
+  puts "username"
+  puts JSON.parse(response.body)[:data][:user][:username]
 end
 
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
