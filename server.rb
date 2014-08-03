@@ -11,6 +11,8 @@ FIREBASE_URL = ENV['FIREBASE_URL']
 
 VENMO_SCOPE = ['access_profile', 'make_payments']
 
+FIREBASE = Firebase::Client.new(FIREBASE_URL)
+
 get '/' do
   if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
     redirect '/dashboard'
@@ -63,7 +65,7 @@ end
 # send venmo id, venmo access token, and venmo secret to firebase
 get '/finish' do 
   twitter_username = nil
-  venmo_username = nil
+  venmo_user_id = nil
 
   # get twitter username
   client = Twitter.configure do |config|
@@ -76,23 +78,49 @@ get '/finish' do
   #twitter username:
   twitter_username = client.user.screen_name
 
-  # get venmo username
+  # get venmo user id
   uri = URI("https://api.venmo.com/v1/me?access_token=#{session[:venmo_access_token]}")
   Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
     request = Net::HTTP::Get.new uri
     response = http.request request # Net::HTTPResponse object
 
-    # venmo username
-    venmo_username = JSON.parse(response.body)['data']['user']['username']
+    # venmo user id
+    venmo_user_id = JSON.parse(response.body)['data']['user']['id']
   end
 
   unless session[:venmo_access_token].nil? || session[:twitter_access_token].nil? || session[:twitter_secret].nil?
-    firebase = Firebase::Client.new(FIREBASE_URL)
-    response = firebase.update("users/#{twitter_username}", {"venmo_username" => venmo_username, \
+    response = FIREBASE.update("users/#{twitter_username}", {"venmo_user_id" => venmo_user_id, \
         "venmo_access_token" => session[:venmo_access_token], "twitter_access_token" => session[:twitter_access_token], \
         "twitter_secret" => session[:twitter_secret]})
 
     puts (response.success?).to_s
+  end
+
+  # process pending donations
+  response = FIREBASE.get("donations", {})
+  if response.success?
+    response.body.select { |k,v| v['donor'] == twitter_username && v['processed_state'] == 'todo'}.each do |k,v|
+      FIREBASE.update("donations/#{k}", {'processed_state' => 'in_progress'})
+
+      # get donor data for venmo payment
+      donor_data = FIREBASE.get("users/#{twitter_username}").body
+      if (donor_data.nil?)
+        FIREBASE.update("donations/#{k}", {'processed_state' => 'todo'})
+      else 
+        donor_venmo_token = donor_data["venmo_access_token"]
+        fundraiser_venmo_userid = FIREBASE.get("users/#{v['fundraiser']}").body["venmo_user_id"]
+        note = "Token donation to: " + v['text']
+        puts "donor_venmo_token:#{donor_venmo_token}"
+        puts "fundraiser_venmo_userid:#{fundraiser_venmo_userid}"
+        puts "note:#{note}"
+        puts "NOT FIRST DONATION; SEND VENMO PAYMENT"
+        uri = URI('https://api.venmo.com/v1/payments')
+        res = Net::HTTP.post_form(uri, 'access_token' => donor_venmo_token, 'user_id' => fundraiser_venmo_userid, 'amount' => '1', 'note' => note)
+        puts res.body
+      end
+
+      FIREBASE.update("donations/#{k}", {'processed_state' => 'done'})
+    end
   end
 
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: \
