@@ -131,8 +131,20 @@ end
 
 get '/dashboard' do
   if session[:twitter_access_token] && session[:twitter_secret] && session[:twitter_username] && session[:venmo_access_token]
-    @donations = FIREBASE.get("donations", {}).body.select { |k,v| v['donor'] == session[:twitter_username]}
-    @campaigns = FIREBASE.get("campaigns", {}).body.select { |k,v| v['fundraiser'] == session[:twitter_username]}
+    donations_res = FIREBASE.get("donations", {}).body
+    campaigns_res = FIREBASE.get("campaigns", {}).body
+    if donations_res.nil?
+      @donations = {}
+    else 
+      @donations = donations_res.select { |k,v| v['donor'] == session[:twitter_username]}
+    end
+
+    if campaigns_res.nil?
+      @campaigns = {}
+    else
+      @campaigns = campaigns_res.select { |k,v| v['fundraiser'] == session[:twitter_username]}
+    end
+
     erb :dashboard
   else
     redirect '/'
