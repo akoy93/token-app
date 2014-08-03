@@ -6,7 +6,7 @@ require 'oauth'
 require 'twitter'
 require 'omniauth-venmo'
 
-require './env'
+require './env' if File.exists? 'env.rb'
 require './server'
 
 use Rack::Session::Cookie
