@@ -19,6 +19,10 @@ get '/twitter/login' do
 end
 
 get '/twitter/callback' do
+  if session[:denied]
+    redirect '/'
+  end
+  
   consumer = OAuth::Consumer.new TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, :site => 'https://api.twitter.com'
 
   puts "CALLBACK: request: #{session[:request_token]}, #{session[:request_token_secret]}"
