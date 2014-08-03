@@ -58,8 +58,8 @@ get '/finish' do
   client = Twitter.configure do |config|
     config.consumer_key = TWITTER_CONSUMER_KEY
     config.consumer_secret = TWITTER_CONSUMER_SECRET
-    config.oauth_token = access_token.token
-    config.oauth_token_secret = access_token.secret
+    config.oauth_token = session[:twitter_access_token]
+    config.oauth_token_secret = session[:twitter_secret]
   end
 
   puts "1234"
