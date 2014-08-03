@@ -99,7 +99,7 @@ get '/finish' do
   # process pending donations
   response = FIREBASE.get("donations", {})
   if response.success?
-    response.body.select { |k,v| v['donor'] == twiter_username && v['processed_state'] == 'todo'}.each do |k,v|
+    response.body.select { |k,v| v['donor'] == twitter_username && v['processed_state'] == 'todo'}.each do |k,v|
       FIREBASE.update("donations/#{k}", {'processed_state' => 'in_progress'})
 
       # get donor data for venmo payment
