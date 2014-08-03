@@ -15,8 +15,8 @@
         </tr>
         <% @donations.values.each do |donation| %>
           <tr>
-            <td><%= donation['fundraiser'] + ' |' %></td>
-            <td><%= donation['text'] + ' |' %></td>
+            <td><%= donation['fundraiser'] + ' | ' %></td>
+            <td><%= donation['text'] + ' | ' %></td>
             <td><%= donation['timestamp'] %></td>
           </tr>
         <% end %>
@@ -33,7 +33,7 @@
         </tr>
         <% @campaigns.values.each do |campaign| %>
           <tr>
-            <td><%= campaign['text'] + ' |' %></td>
+            <td><%= campaign['text'] + ' | ' %></td>
             <td><%= campaign['timestamp'] %></td>
           </tr>
         <% end %>
