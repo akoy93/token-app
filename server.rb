@@ -8,7 +8,7 @@ VENMO_CALLBACK_URL = ENV['VENMO_CALLBACK_URL']
 VENMO_SCOPE = ['access_profile', 'make_payments']
 
 get '/' do
-  "hello"
+  send_file File.expand_path('index.html', settings.public_folder)
 end
 
 get '/twitter/login' do
