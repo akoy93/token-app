@@ -103,7 +103,7 @@ get '/finish' do
       FIREBASE.update("donations/#{k}", {'processed_state' => 'in_progress'})
 
       # get donor data for venmo payment
-      donor_data = firebase.get("users/#{twitter_username}").body
+      donor_data = FIREBASE.get("users/#{twitter_username}").body
       if (donor_data.nil?)
         FIREBASE.update("donations/#{k}", {'processed_state' => 'todo'})
       else 
