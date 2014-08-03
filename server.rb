@@ -130,12 +130,11 @@ get '/finish' do
 end
 
 get '/dashboard' do
-  donor_twitter_username = session[:twitter_username]
-  response = firebase.get("donations", {"donor" => donor_twitter_username})
-  @donations = response.body
-  # if session[:twitter_access_token] && session[:twitter_secret] && session[:twitter_username] && session[:venmo_access_token]
-  erb :dashboard
-  # else
-    # redirect '/'
-  # end
+  if session[:twitter_access_token] && session[:twitter_secret] && session[:twitter_username] && session[:venmo_access_token]
+    @donations = FIREBASE.get("donations", {}).body.select { |k,v| v['donor'] == session[:twitter_username]}
+    @campaigns = FIREBASE.get("campaigns", {}).body.select { |k,v| v['fundraiser'] == session[:twitter_username]}
+    erb :dashboard
+  else
+    redirect '/'
+  end
 end

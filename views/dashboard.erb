@@ -3,9 +3,41 @@
     <title>Token Dashboard</title>
   </head>
   <body>
-    <h1><%= @heading %></h1>
-    <% @donations.each do |donation| %>
+    <h2>My Donations</h2>
+    <% if @donations.empty? %>
+      <p>No donations</p>
+    <% else %>
+      <table>
+        <tr>
+          <td>Fundraiser</td>
+          <td>Campaign</td>
+          <td>Timestamp</td>
+        </tr>
+        <% @donations.values.each do |donation| %>
+          <tr>
+            <td><%= donation['fundraiser'] + '|' %></td>
+            <td><%= donation['text'] + '|' %></td>
+            <td><%= donation['timestamp'] %></td>
+          </tr>
+        <% end %>
+      </table>
     <% end %>
-    <p>dashboard view</p>
+    <h2>My Campaigns</h2> 
+    <% if @campaigns.empty? %>
+      <p>No campaigns</p>
+    <% else %>
+      <table>
+        <tr>
+          <td>Campaign</td>
+          <td>Timestamp</td>
+        </tr>
+        <% @campaigns.values.each do |campaign| %>
+          <tr>
+            <td><%= campaign['text'] + '|' %></td>
+            <td><%= campaign['timestamp'] %></td>
+          </tr>
+        <% end %>
+      </table>
+    <% end %>
   </body>
 </html>
