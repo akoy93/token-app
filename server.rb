@@ -9,9 +9,15 @@ end
 get '/twitter/login' do
   consumer = OAuth::Consumer.new TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, :site => 'https://api.twitter.com'
 
-  request_token = consumer.get_request_token :oauth_callback => TWITTER_CALLBACK_URL
-  session[:request_token] = request_token.token
-  session[:request_token_secret] = request_token.secret
+  if session[:request_token] && session[:request_token_secret]
+    puts "have request token"
+    puts session.inspect
+    request_token = OAuth::RequestToken.new consumer, session[:request_token], session[:request_token_secret]
+  else
+    request_token = consumer.get_request_token :oauth_callback => TWITTER_CALLBACK_URL
+    session[:request_token] = request_token.token
+    session[:request_token_secret] = request_token.secret
+  end
 
   puts "request: #{session[:request_token]}, #{session[:request_token_secret]}"
 
