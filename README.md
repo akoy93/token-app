@@ -1,0 +1,1 @@
+8:07 PM - Twitter OAuth working. Run "thin start" to run the app locally.
