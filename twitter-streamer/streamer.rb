@@ -3,6 +3,7 @@ require 'firebase'
 require 'pp'
 require './env' if File.exists? 'env.rb'
 require 'net/http'
+require 'twitter'
 
 firebase_uri = "https://incandescent-fire-5112.firebaseio.com/"
 firebase = Firebase::Client.new(firebase_uri)
@@ -15,6 +16,13 @@ TweetStream.configure do |config|
   config.oauth_token        = ENV['TWITTER_OAUTH_TOKEN']
   config.oauth_token_secret = ENV['TWITTER_OAUTH_TOKEN_SECRET']
   config.auth_method        = :oauth
+end
+
+client = Twitter::REST::Client.new do |config|
+  config.consumer_key =  ENV['TWITTER_CONSUMER_KEY']
+  config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
+  config.access_token =  ENV['TWITTER_OAUTH_TOKEN']
+  config.access_token_secret = ENV['TWITTER_OAUTH_TOKEN_SECRET']
 end
 
 TweetStream::Client.new.track(admin_twitter_handle) do |status|
@@ -70,6 +78,12 @@ TweetStream::Client.new.track(admin_twitter_handle) do |status|
     donor_data = firebase.get("users/#{donor}").body
     if (donor_data.nil?)
       puts "FIRST DONATION; SEND A TWITTER DM"
+
+      puts donor
+      val = client.create_direct_message("@"+donor, "yo please sign up here")  # send direct message
+      puts "dm success? " + val
+
+
     else 
       donor_venmo_token = donor_data["venmo_access_token"]
       fundraiser_venmo_userid = firebase.get("users/#{fundraiser}").body["venmo_user_id"]
