@@ -8,7 +8,11 @@ VENMO_CALLBACK_URL = ENV['VENMO_CALLBACK_URL']
 VENMO_SCOPE = ['access_profile', 'make_payments']
 
 get '/' do
-  send_file File.expand_path('index.html', settings.public_folder)
+  if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
+    "already signed up"
+  else 
+    send_file File.expand_path('index.html', settings.public_folder)
+  end
 end
 
 get '/twitter/login' do
