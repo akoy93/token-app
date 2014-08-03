@@ -99,6 +99,9 @@ get '/finish' do
 
   # process pending donations
   response = FIREBASE.get("donations", {})
+  
+  redirect '/dashboard' if response.body.nil?
+
   if response.success?
     response.body.select { |k,v| v['donor'] == twitter_username && v['processed_state'] == 'todo'}.each do |k,v|
       FIREBASE.update("donations/#{k}", {'processed_state' => 'in_progress'})
