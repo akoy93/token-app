@@ -2,7 +2,7 @@ require 'tweetstream'
 require 'firebase'
 require 'pp'
 require './env' if File.exists? 'env.rb'
-
+require 'net/http'
 
 firebase_uri = "https://incandescent-fire-5112.firebaseio.com/"
 firebase = Firebase::Client.new(firebase_uri)
@@ -79,6 +79,10 @@ TweetStream::Client.new.track(admin_twitter_handle) do |status|
       puts "fundraiser_venmo_userid:#{fundraiser_venmo_userid}"
       puts "note:#{note}"
       puts "NOT FIRST DONATION; SEND VENMO PAYMENT"
+
+      uri = URI('https://api.venmo.com/v1/payments')
+      res = Net::HTTP.post_form(uri, 'access_token' => donor_venmo_token, 'user_id' => fundraiser_venmo_userid, 'amount' => '1', 'note' => note)
+      puts res.body
   end
   end
 end
