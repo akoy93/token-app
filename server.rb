@@ -106,8 +106,6 @@ get '/finish' do
   #   end
   # end
 
-  end
-
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: \
       #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
   redirect '/dashboard'
