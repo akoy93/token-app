@@ -9,7 +9,7 @@ VENMO_SCOPE = ['access_profile', 'make_payments']
 
 get '/' do
   if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
-    "already signed up"
+    redirect '/dashboard'
   else 
     send_file File.expand_path('index.html', settings.public_folder)
   end
@@ -35,15 +35,9 @@ get '/twitter/callback' do
   request_token = OAuth::RequestToken.new consumer, session[:request_token], session[:request_token_secret]
   access_token = request_token.get_access_token :oauth_verifier => params[:oauth_verifier]
 
-  Twitter.configure do |config|
-    config.consumer_key = TWITTER_CONSUMER_KEY
-    config.consumer_secret = TWITTER_CONSUMER_SECRET
-    config.oauth_token = access_token.token
-    config.oauth_token_secret = access_token.secret
-  end
   session[:twitter_access_token] = access_token.token
   session[:twitter_secret] = access_token.secret
-  # "[#{Twitter.user.screen_name}] access_token: #{access_token.token}, secret: #{access_token.secret}"
+
   redirect '/venmo/login'
 end
 
@@ -60,5 +54,24 @@ end
 #finish, send twitter handle, access token, and secret to firebase
 # send venmo id, venmo access token, and venmo secret to firebase
 get '/finish' do 
-  "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
+  # get twitter username
+  client = Twitter.configure do |config|
+    config.consumer_key = TWITTER_CONSUMER_KEY
+    config.consumer_secret = TWITTER_CONSUMER_SECRET
+    config.oauth_token = access_token.token
+    config.oauth_token_secret = access_token.secret
+  end
+
+  puts "1234"
+  puts client.user
+  puts client.user.screen_name  
+
+  # get venmo username
+
+  # s = "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
+  redirect '/dashboard'
+end
+
+get '/dashboard' do
+  "dashboard"
 end
