@@ -129,5 +129,9 @@ get '/finish' do
 end
 
 get '/dashboard' do
-  "dashboard"
+  if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
+    erb :dashboard
+  else
+    redirect '/'
+  end
 end
