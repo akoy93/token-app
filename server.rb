@@ -81,7 +81,7 @@ Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
   puts "1234"
   puts request
   puts "5678"
-  puts response.body.data.user.username
+  puts JSON.parse(response.body).data.user.username
 end
 
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"

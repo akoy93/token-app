@@ -7,6 +7,7 @@ require 'sinatra'
 require 'oauth'
 require 'twitter'
 require 'omniauth-venmo'
+require 'json'
 
 require './env' if File.exists? 'env.rb'
 require './server'
