@@ -1,4 +1,5 @@
 require 'net/http'
+require 'net/https'
 
 TWITTER_CONSUMER_KEY = ENV['TWITTER_CONSUMER_KEY']
 TWITTER_CONSUMER_SECRET = ENV['TWITTER_CONSUMER_SECRET']
@@ -70,11 +71,17 @@ get '/finish' do
   #twitter username:
   puts client.user.screen_name  
 
-  # get venmo username
-  url = URI.parse("https://api.venmo.com/v1/me?access_token=#{session[:venmo_access_token]}")
-  res = Net::HTTP::Get.new(url.to_s)
-  puts res.body
+# get venmo username
+uri = URI("https://api.venmo.com/v1/me?access_token=#{session[:venmo_access_token]}")
 
+Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+  request = Net::HTTP::Get.new uri
+
+  response = http.request request # Net::HTTPResponse object
+  puts "1234"
+  puts request
+  puts response
+end
 
   puts "Twitter access token: #{session[:twitter_access_token]}, Twitter secret: #{session[:twitter_secret]}, Venmo access token: #{session[:venmo_access_token]}"
   redirect '/dashboard'
