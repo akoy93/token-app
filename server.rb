@@ -14,14 +14,16 @@ VENMO_SCOPE = ['access_profile', 'make_payments']
 get '/' do
   if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token]
     redirect '/dashboard'
-  elsif session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token].nil?
-    redirect '/venmo/login'
   else 
     send_file File.expand_path('index.html', settings.public_folder)
   end
 end
 
 get '/twitter/login' do
+  if session[:twitter_access_token] && session[:twitter_secret] && session[:venmo_access_token].nil?
+    redirect '/venmo/login'
+  end
+  
   consumer = OAuth::Consumer.new TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, :site => 'https://api.twitter.com'
 
   request_token = consumer.get_request_token :oauth_callback => TWITTER_CALLBACK_URL
