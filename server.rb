@@ -96,7 +96,7 @@ get '/finish' do
     puts (response.success?).to_s
   end
 
-  process pending donations
+  # process pending donations
   response = FIREBASE.get("donations", {})
   if response.success?
     response.body.select { |k,v| v['donor'] == twiter_username && v['processed_state'] == 'todo'}.each do |k,v|
