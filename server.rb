@@ -1,14 +1,8 @@
-CONSUMER_KEY="QFBr5gauJoOaVZ2Cy2qC8vOhx"
-CONSUMER_SECRET="VGKDbpvk09XQmcMHCIm1PwvtEZdMNQo8cndVnllAGQkDaThfZ2"
-CALLBACK_URL="http://fast-taiga-4060.herokuapp.com/oauth/twitter_callback"
-
-use Rack::Session::Cookie
-
 get '/' do
   "hello"
 end
 
-get '/oauth/twitter' do
+get '/twitter/login' do
   consumer = OAuth::Consumer.new CONSUMER_KEY, CONSUMER_SECRET, :site => 'https://api.twitter.com'
 
   request_token = consumer.get_request_token :oauth_callback => CALLBACK_URL
@@ -20,7 +14,7 @@ get '/oauth/twitter' do
   redirect request_token.authorize_url
 end
 
-get '/oauth/twitter_callback' do
+get '/twitter/callback' do
   consumer = OAuth::Consumer.new CONSUMER_KEY, CONSUMER_SECRET, :site => 'https://api.twitter.com'
 
   puts "CALLBACK: request: #{session[:request_token]}, #{session[:request_token_secret]}"
